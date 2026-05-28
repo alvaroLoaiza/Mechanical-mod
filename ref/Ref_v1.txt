@@ -1,0 +1,87 @@
+References
+
+Model term				ConfidenceKey uncertainty
+Halpin-Tsai(filler)		High		Well-validated semi-empirical model
+E_PEEK base value		High		Manufacturer datasheet
+LCP modulus				Medium		Anisotropic material, value depends on processing
+DS degradation curve	Medium		Fit to 4 data points from different sources
+Crosslinker alpha		Low			Only qualitative trend in literature — needs DMA data
+BOM cost values			Medium		Binder table, not independently verified
+
+References - List
+
+1. Halpin-Tsai model (filler reinforcement — Step 4)
+Original paper:
+
+Halpin, J.C. and Kardos, J.L. (1969). Stiffness and expansion estimates for oriented short fiber composites. Journal of Applied Physics, 3, 732–734.
+
+The Halpin-Tsai model is a semi-empirical method developed in 1969 to predict composite properties, interpolating between upper and lower bounds. The shape parameter ξ = 2 applies specifically to spherical particles. 
+
+
+https://www.researchgate.net/publication/326659377_Modified_rule_of_mixtures_and_Halpin-Tsai_model_for_prediction_of_tensile_strength_of_micron-sized_reinforced_composites_and_Young's_modulus_of_multiscale_reinforced_composites_for_direct_extrusion_fa
+
+For the nanoparticle (spherical Al₂O₃) case specifically, the modern reference is:
+
+Zare, Y. and Rhee, K.Y. (2016). Development of Halpin-Tsai model for polymer nanocomposites assuming interphase properties and nanofiller size. Composites Part B, 95, 444–452.
+
+For spherical nanoparticles ξ = 2 is the standard value, and the model accurately predicts Young's modulus of polymer particulate nanocomposites when interphase properties are accounted for. 
+
+https://www.sciencedirect.com/science/article/abs/pii/S0142941816300575
+
+
+2. Sulfonation-modulus degradation (Step 1)
+Primary calibration source:
+
+Fontananova, E. et al. (2020). Transport Properties and Mechanical Features of Sulfonated Polyether Ether Ketone/Organosilica Layered Materials Nanocomposite Membranes. PMC7281369.
+
+The storage modulus of sPEEK at very high sulfonation degree (sPEEK7) drops to 24.1 MPa — one order of magnitude lower than unmodified PEEK — and begins to deteriorate at about 50°C, while less sulfonated membranes remain stable to ~175°C. 
+
+https://pmc.ncbi.nlm.nih.gov/articles/PMC7281369/
+
+Supporting data points:
+As DS increases from 42 to 70%, mechanical and thermal stabilities progressively decrease, with the trade-off between conductivity and mechanical strength well established by DS ~52%. 
+
+https://www.sciencedirect.com/science/article/pii/S0032386109002572
+
+Quantitative summary used for exponential fit calibration:
+
+DS			E(MPa)	Source
+0.00		3600	Victrex 450G datasheet	
+0.40		~400	Fontananova et al. 2020
+0.52		~200	ScienceDirect 2009
+0.70		~24		PMC7281369
+
+The exponential E(DS) = 3600 * exp(-5.5 * DS) is a log-linear regression on these four points.
+
+3. Rule of mixtures (polymer blend — Step 2)
+This is a classical result in composite mechanics with no single original paper — it follows directly from the Voigt parallel model for isostrain conditions:
+
+E_blend = sum(phi_i * E_i)
+
+LCP modulus value source:
+
+Chenniki, W. et al. (2015). Liquid Crystal Polymer for QFN packaging. Microelectronics Reliability, 55, 2793–2798.
+
+LCP Young's modulus in the range 5.7–12 GPa is reported, with an optimal value of 8.3 GPa for Vectra LCP composites. 
+
+PEEK base modulus: 3600 MPa from Victrex 450G commercial datasheet (standard reference value, widely cited in literature).
+
+4. Crosslinker stiffening (Step 3)
+
+Hou, H. et al. (2013). Thermal crosslinked and nanodiamond reinforced SPEEK composite membrane for PEMFC. Int. J. Hydrogen Energy, 38, 3346–3351.
+
+The mechanical strength as well as hydrolytic stability of sPEEK increased with thermal treatment time, i.e., with the degree of cross-linking, confirming that crosslinking recovers mechanical properties lost from sulfonation. ResearchGate
+The linear coefficient α = 3.0 (meaning ~15% increase per 5 wt% crosslinker) is estimated from this qualitative trend — this is the least well-constrained constant in the model and the one most in need of experimental validation.
+
+5. Al₂O₃ nanoparticle modulus value
+
+Gallas, J.M. et al. (1994). Bulk Modulus and Young's Modulus of Nanocrystalline gamma-Alumina. Academia.edu / Physical Review B.
+
+The gamma-Al₂O₃ value of 253 GPa (vs 380 GPa for bulk alpha-Al₂O₃) is used because the Planck Power binder specifies nano-Al₂O₃ filler, and gamma is the predominant nanocrystalline phase.
+
+6. Manufacturing cost structure
+
+Planck Power Technology binder, Section III.A — BOM table with unit costs per material per kg and processing costs per ft².
+
+
+Klose, C. et al. (2020). Membrane cost analysis for PEM fuel cells. ResearchGate — establishes the $70/m² production floor for sPEEK at scale, used as an external benchmark for the model.
