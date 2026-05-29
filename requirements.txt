@@ -1,0 +1,8 @@
+# MODEL1.py -- Mechanical Modulus and Manufacturing Cost Model
+# Only two dependencies: numpy and matplotlib.
+# If you are using your existing myenv environment these are
+# likely already installed. Run `pip install -r requirements.txt`
+# to install or upgrade them.
+
+numpy==2.4.4
+matplotlib==3.10.8
