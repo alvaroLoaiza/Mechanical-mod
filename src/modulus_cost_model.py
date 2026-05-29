@@ -43,6 +43,15 @@ Manufacturing cost constants (Planck Power binder, Section III.A BOM):
   Overhead      15%
 """
 
+# NOTE: np.clip() calls throughout this function silently clamp inputs
+# to physical bounds. This is safe for standalone use but DANGEROUS
+# inside an optimization loop -- the optimizer receives a valid-looking
+# output for an out-of-range input, corrupting the objective landscape.
+# Before integrating with NSGA-II / pymoo, replace np.clip() with
+# explicit ValueError checks, or rely on the optimizer's xl/xu bounds
+# and remove the clips entirely.
+
+
 import numpy as np
 
 
@@ -104,6 +113,28 @@ def E_sPEEK(DS):
         DS=0.40  E~400 MPa   (sPEEK literature range)
         DS=0.60  E~100 MPa   (sPEEK literature range)
         DS=0.70  E~24 MPa    (PMC7281369, sPEEK7)
+
+    # Sulfonation-modulus degradation: E(DS) = E_PEEK_0 * exp(-K_DS * DS)
+    #
+    # E_PEEK_0 = 3600 MPa is fixed to the pristine PEEK manufacturer value
+    # (Victrex 450G datasheet) rather than fitted freely. This physical anchor
+    # ensures E(DS=0) is exact regardless of the sparse literature data.
+    #
+    # With E_PEEK_0 constrained, K_DS is the only free parameter.
+    # Taking the log: ln(E) = ln(3600) - K_DS * DS  (linear in K_DS)
+    # Closed-form least-squares solution:
+    #   K_DS = sum(DS_i * (ln(3600) - ln(E_i))) / sum(DS_i^2)
+    #
+    # Calibration data (three literature points):
+    #   DS=0.40  E=400 MPa  -> K_DS = 5.49  (sPEEK literature range)
+    #   DS=0.60  E=100 MPa  -> K_DS = 5.99  (sPEEK literature range)
+    #   DS=0.70  E= 24 MPa  -> K_DS = 6.81  (PMC7281369, sPEEK7)
+    #
+    # Constrained least-squares fit gives K_DS = 6.14.
+    # Current value K_DS = 5.5 is conservative (anchored to DS=0.40 point),
+    # which slightly overestimates modulus at high DS (DS > 0.65).
+    # Update to K_DS = 6.14 for a better fit across the full DS range.
+
     """
     DS = float(np.clip(DS, 0.0, 0.95))
     return E_PEEK_0 * np.exp(-K_DS * DS)
